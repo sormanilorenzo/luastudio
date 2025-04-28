@@ -438,6 +438,11 @@
       color: var(--text-light);
     }
     
+    /* File input nascosto */
+    #fileInput {
+      display: none;
+    }
+    
     /* Scrollbar stilizzata */
     #editor::-webkit-scrollbar {
       width: 8px;
@@ -564,8 +569,8 @@
     body.light-theme .table { color: #d97706; }
     
     /* Effetti di hover sui pulsanti */
-    .btn-save { background-color: var(--success); }
-    .btn-save:hover { background-color: #36c172; }
+    .btn-import { background-color: var(--success); }
+    .btn-import:hover { background-color: #36c172; }
     
     .btn-copy { background-color: var(--info); }
     .btn-copy:hover { background-color: #3490dc; }
@@ -642,8 +647,9 @@
         <span class="lua-extension">.lua</span>
       </div>
       <div class="buttons">
-        <button class="btn btn-save" id="saveBtn">
-          <i class="fa-solid fa-floppy-disk"></i> Salva
+        <input type="file" id="fileInput" accept=".lua,.txt">
+        <button class="btn btn-import" id="importBtn">
+          <i class="fa-solid fa-file-import"></i> Importa
         </button>
         <button class="btn btn-copy" id="copyBtn">
           <i class="fa-solid fa-copy"></i> Copia
@@ -738,7 +744,8 @@ print(saluta(persona.nome))
       const editor = document.getElementById('editor');
       const lineNumbers = document.getElementById('lineNumbers');
       const themeToggle = document.getElementById('themeToggle');
-      const saveBtn = document.getElementById('saveBtn');
+      const importBtn = document.getElementById('importBtn');
+      const fileInput = document.getElementById('fileInput');
       const copyBtn = document.getElementById('copyBtn');
       const downloadBtn = document.getElementById('downloadBtn');
       const filenameInput = document.getElementById('filename');
@@ -792,11 +799,34 @@ print(saluta(persona.nome))
         highlight(); // Riapplica l'evidenziazione della sintassi
       });
       
-      // Funzione per salvare il contenuto (simulata)
-      saveBtn.addEventListener('click', () => {
-        localStorage.setItem('luaCode', editor.value);
-        localStorage.setItem('luaFilename', filenameInput.value);
-        showToast('Codice salvato con successo!', 'success');
+      // Funzione per importare un file
+      importBtn.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      // Gestisci l'input del file selezionato
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          editor.value = e.target.result;
+          updateLineNumbers();
+          highlight();
+          
+          // Aggiorna il nome del file senza estensione
+          const fileName = file.name.replace(/\.[^/.]+$/, "");
+          filenameInput.value = fileName;
+          
+          showToast(`File ${file.name} importato con successo!`, 'success');
+        };
+        
+        reader.onerror = function() {
+          showToast('Errore durante la lettura del file', 'error');
+        };
+        
+        reader.readAsText(file);
       });
       
       // Funzione per copiare il codice negli appunti
