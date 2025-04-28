@@ -29,6 +29,8 @@
       --gutter-light: #edf2f7;
       --line-highlight-dark: rgba(124, 58, 237, 0.1);
       --line-highlight-light: rgba(124, 58, 237, 0.1);
+      --terminal-dark: #1e1e2e;
+      --terminal-light: #f8fafc;
     }
     
     * {
@@ -411,6 +413,7 @@
       font-size: 14px;
       line-height: 1.5;
       user-select: none;
+      z-index: 2;
     }
     
     body.light-theme .line-numbers {
@@ -582,6 +585,192 @@
     #editor:focus {
       box-shadow: inset 0 0 0 2px rgba(124, 58, 237, 0.2);
     }
+
+    /* Nuovo stile per il terminale */
+    .terminal-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: var(--bg-dark-secondary);
+      color: var(--text-dark);
+      border: none; 
+      border-radius: 0 0 8px 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin: -10px auto 15px;
+      position: relative;
+      z-index: 10;
+      width: 200px;
+    }
+    
+    body.light-theme .terminal-toggle {
+      background-color: var(--bg-light-secondary);
+      color: var(--text-light);
+    }
+    
+    .terminal-wrapper {
+      background-color: var(--terminal-dark);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      height: 0;
+      transition: height 0.3s ease;
+    }
+
+    .terminal-wrapper.expanded {
+      height: 250px;
+    }
+    
+    body.light-theme .terminal-wrapper {
+      background-color: var(--terminal-light);
+    }
+    
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background-color: var(--bg-dark-secondary);
+      border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+    }
+    
+    body.light-theme .terminal-header {
+      background-color: var(--bg-light-secondary);
+    }
+    
+    .terminal-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent-primary);
+    }
+    
+    .terminal-container {
+      height: calc(250px - 40px);
+      overflow-y: auto;
+      padding: 10px;
+    }
+    
+    #terminal {
+      color: var(--text-dark);
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-family: 'Fira Code', monospace;
+    }
+    
+    body.light-theme #terminal {
+      color: var(--text-light);
+    }
+    
+    .terminal-input-line {
+      display: flex;
+      margin-top: 5px;
+    }
+    
+    .terminal-prompt {
+      color: var(--accent-primary);
+      margin-right: 8px;
+    }
+    
+    #terminal-input {
+      background: transparent;
+      border: none;
+      color: var(--text-dark);
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      flex-grow: 1;
+      outline: none;
+    }
+    
+    body.light-theme #terminal-input {
+      color: var(--text-light);
+    }
+
+    .terminal-text {
+      margin-bottom: 5px;
+    }
+
+    .terminal-error {
+      color: var(--error);
+    }
+
+    .terminal-success {
+      color: var(--success);
+    }
+
+    .terminal-warning {
+      color: var(--warning);
+    }
+
+    .terminal-info {
+      color: var(--info);
+    }
+
+    .terminal-library {
+      background-color: var(--bg-dark-secondary);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.light-theme .terminal-library {
+      background-color: var(--bg-light-secondary);
+    }
+
+    .terminal-library-name {
+      font-weight: bold;
+    }
+
+    .terminal-library-version {
+      color: var(--accent-tertiary);
+      font-size: 12px;
+    }
+
+    .library-list {
+      margin-top: 10px;
+    }
+
+    .terminal-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .terminal-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+    
+    .terminal-container::-webkit-scrollbar-thumb {
+      background: var(--accent-primary);
+      border-radius: 4px;
+    }
+    
+    .terminal-container::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-secondary);
+    }
+    
+    /* Pulsante Toggle Terminal */
+    .terminal-toggle:hover {
+      transform: translateY(-2px);
+    }
+
+    .terminal-toggle .fa-chevron-down {
+      transition: transform 0.3s ease;
+    }
+
+    .terminal-toggle.expanded .fa-chevron-down {
+      transform: rotate(180deg);
+    }
     
     /* Design responsivo */
     @media (max-width: 768px) {
@@ -606,6 +795,10 @@
       #editor {
         height: 400px;
         font-size: 14px;
+      }
+
+      .terminal-wrapper.expanded {
+        height: 200px;
       }
     }
   </style>
@@ -683,6 +876,9 @@ local function saluta(nome)
     return "Ciao, " .. nome .. "!"
 end
 
+-- Importa una libreria (usa il terminale per importare più librerie)
+local json = require("json")
+
 -- Definizione di una tabella
 local persona = {
     nome = "Mario",
@@ -705,6 +901,10 @@ else
     print(persona.nome .. " è minorenne")
 end
 
+-- Converte l'oggetto persona in JSON (utilizzo della libreria importata)
+local personaJSON = json.encode(persona)
+print(personaJSON)
+
 -- Funzione che utilizza la closure
 function contatore()
     local count = 0
@@ -724,188 +924,417 @@ print(saluta(persona.nome))
       </div>
     </div>
     
-    <!-- Footer migliorato -->
-    <footer>
-      <p>LuaCode Studio Sormani &copy; 2025 - Un potente editor per la programmazione Lua</p>
-    </footer>
+<!-- Pulsante Toggle Terminal -->
+<button class="terminal-toggle" id="terminalToggle">
+  <i class="fa-solid fa-terminal"></i> Terminal
+  <i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<!-- Terminal simile a VS Code -->
+<div class="terminal-wrapper" id="terminalWrapper">
+  <div class="terminal-header">
+    <div class="terminal-title">
+      <i class="fa-solid fa-terminal"></i>
+      Terminal
+    </div>
   </div>
+  <div class="terminal-container">
+    <div id="terminal">
+      <div class="terminal-text terminal-info">LuaCode Package Manager v1.0.0</div>
+      <div class="terminal-text">Digita 'help' per visualizzare i comandi disponibili.</div>
+    </div>
+    <div class="terminal-input-line">
+      <span class="terminal-prompt">></span>
+      <input type="text" id="terminal-input" placeholder="Digita un comando..." autofocus>
+    </div>
+  </div>
+</div>
+
+<!-- Footer migliorato -->
+<footer>
+  <p>LuaCode Studio Sormani &copy; 2025 - Un potente editor per la programmazione Lua</p>
+</footer>
+</div>
+
+<!-- Container per i toast di notifica -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Aspetta che la pagina sia completamente caricata
+document.addEventListener('DOMContentLoaded', function() {
+  // Simula il caricamento
+  setTimeout(() => {
+    document.querySelector('.loader-container').style.display = 'none';
+  }, 1800);
   
-  <!-- Container per i toast di notifica -->
-  <div class="toast-container" id="toastContainer"></div>
+  const editor = document.getElementById('editor');
+  const lineNumbers = document.getElementById('lineNumbers');
+  const themeToggle = document.getElementById('themeToggle');
+  const importBtn = document.getElementById('importBtn');
+  const fileInput = document.getElementById('fileInput');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const filenameInput = document.getElementById('filename');
+  const toastContainer = document.getElementById('toastContainer');
+  const terminalToggle = document.getElementById('terminalToggle');
+  const terminalWrapper = document.getElementById('terminalWrapper');
+  const terminal = document.getElementById('terminal');
+  const terminalInput = document.getElementById('terminal-input');
   
-  <script>
-    // Aspetta che la pagina sia completamente caricata
-    document.addEventListener('DOMContentLoaded', function() {
-      // Simula il caricamento
-      setTimeout(() => {
-        document.querySelector('.loader-container').style.display = 'none';
-      }, 1800);
-      
-      const editor = document.getElementById('editor');
-      const lineNumbers = document.getElementById('lineNumbers');
-      const themeToggle = document.getElementById('themeToggle');
-      const importBtn = document.getElementById('importBtn');
-      const fileInput = document.getElementById('fileInput');
-      const copyBtn = document.getElementById('copyBtn');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const filenameInput = document.getElementById('filename');
-      const toastContainer = document.getElementById('toastContainer');
-      
-      // Funzione per mostrare un toast di notifica
-      function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        let icon;
-        switch(type) {
-          case 'success': icon = 'fa-check-circle'; break;
-          case 'error': icon = 'fa-exclamation-circle'; break;
-          case 'info': icon = 'fa-info-circle'; break;
-          case 'warning': icon = 'fa-exclamation-triangle'; break;
-          default: icon = 'fa-check-circle';
-        }
-        
-        toast.innerHTML = `
-          <i class="toast-icon fa-solid ${icon}"></i>
-          <span>${message}</span>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // Rimuovi il toast dopo l'animazione
-        setTimeout(() => {
-          toast.remove();
-        }, 3000);
-      }
-      
-      // Funzione per aggiornare i numeri di riga
-      function updateLineNumbers() {
-        const lines = editor.value.split('\n');
-        lineNumbers.innerHTML = '';
-        
-        for (let i = 0; i < lines.length; i++) {
-          lineNumbers.innerHTML += (i + 1) + '<br>';
-        }
-      }
-      
-      // Toggle tema chiaro/scuro
-      themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('light-theme');
-        if (document.body.classList.contains('light-theme')) {
-          themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        } else {
-          themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        }
-        highlight(); // Riapplica l'evidenziazione della sintassi
-      });
-      
-      // Funzione per importare un file
-      importBtn.addEventListener('click', () => {
-        fileInput.click();
-      });
-      
-      // Gestisci l'input del file selezionato
-      fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          editor.value = e.target.result;
-          updateLineNumbers();
-          highlight();
-          
-          // Aggiorna il nome del file senza estensione
-          const fileName = file.name.replace(/\.[^/.]+$/, "");
-          filenameInput.value = fileName;
-          
-          showToast(`File ${file.name} importato con successo!`, 'success');
-        };
-        
-        reader.onerror = function() {
-          showToast('Errore durante la lettura del file', 'error');
-        };
-        
-        reader.readAsText(file);
-      });
-      
-      // Funzione per copiare il codice negli appunti
-      copyBtn.addEventListener('click', () => {
-        editor.select();
-        document.execCommand('copy');
-        showToast('Codice copiato negli appunti!', 'info');
-      });
-      
-      // Funzione per scaricare il file .lua
-      downloadBtn.addEventListener('click', () => {
-        const filename = filenameInput.value || 'main';
-        const text = editor.value;
-        const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename + '.lua');
-        
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        
-        element.click();
-        
-        document.body.removeChild(element);
-        showToast(`File ${filename}.lua scaricato!`, 'success');
-      });
-      
-      // Carica codice salvato se presente
-      if (localStorage.getItem('luaCode')) {
-        editor.value = localStorage.getItem('luaCode');
-      }
-      
-      if (localStorage.getItem('luaFilename')) {
-        filenameInput.value = localStorage.getItem('luaFilename');
-      }
-      
-      // Gestione eventi per l'editor
-      editor.addEventListener('input', function() {
-        updateLineNumbers();
-        highlight();
-      });
-      
-      editor.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-          e.preventDefault();
-          
-          // Inserisci 4 spazi al posto del tab
-          const start = this.selectionStart;
-          const end = this.selectionEnd;
-          
-          this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-          this.selectionStart = this.selectionEnd = start + 4;
-        }
-      });
-      
-      // Funzione per evidenziare la sintassi Lua
-      function highlight() {
-        // In una versione reale questa funzione implementerebbe 
-        // l'evidenziazione della sintassi usando una regexp o una libreria
-        console.log("Evidenziazione sintassi applicata");
-      }
-      
-      // Aggiorna i numeri di riga all'avvio
+  // Database di librerie Lua simulate
+  const luaLibraries = {
+    "json": { version: "1.3.4", description: "JSON encoder/decoder per Lua" },
+    "socket": { version: "3.0.0", description: "LuaSocket - Networking support per Lua" },
+    "http": { version: "0.4.0", description: "Client HTTP per Lua" },
+    "luasql": { version: "2.6.0", description: "Interfaccia database SQL per Lua" },
+    "lfs": { version: "1.8.0", description: "LuaFileSystem - File system per Lua" },
+    "md5": { version: "1.2.0", description: "MD5 hashing library" },
+    "redis": { version: "2.0.5", description: "Client Redis per Lua" },
+    "date": { version: "2.2.0", description: "Date & Time Library per Lua" },
+    "xml": { version: "1.1.0", description: "XML parser per Lua" },
+    "yaml": { version: "0.2.5", description: "YAML encoder/decoder per Lua" }
+  };
+  
+  // Librerie installate (inizialmente solo json)
+  const installedLibraries = {
+    "json": { version: "1.3.4" }
+  };
+  
+  // Comando di aiuto
+  const helpText = `
+<div class="terminal-text terminal-info">Comandi disponibili:</div>
+<div class="terminal-text">  install &lt;nome_libreria&gt;   - Installa una libreria</div>
+<div class="terminal-text">  search &lt;termine&gt;         - Cerca librerie</div>
+<div class="terminal-text">  list                   - Mostra librerie installate</div>
+<div class="terminal-text">  remove &lt;nome_libreria&gt;   - Rimuovi una libreria</div>
+<div class="terminal-text">  clear                  - Pulisce il terminale</div>
+<div class="terminal-text">  help                   - Mostra questo messaggio</div>
+`;
+  
+  // Funzione per mostrare un toast di notifica
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon;
+    switch(type) {
+      case 'success': icon = 'fa-check-circle'; break;
+      case 'error': icon = 'fa-exclamation-circle'; break;
+      case 'info': icon = 'fa-info-circle'; break;
+      case 'warning': icon = 'fa-exclamation-triangle'; break;
+      default: icon = 'fa-check-circle';
+    }
+    
+    toast.innerHTML = `
+      <i class="toast-icon fa-solid ${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Rimuovi il toast dopo l'animazione
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // Funzione per aggiornare i numeri di riga
+  function updateLineNumbers() {
+    const lines = editor.value.split('\n');
+    lineNumbers.innerHTML = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      lineNumbers.innerHTML += (i + 1) + '<br>';
+    }
+  }
+  
+  // Toggle tema chiaro/scuro
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    if (document.body.classList.contains('light-theme')) {
+      themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+    } else {
+      themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    }
+    highlight(); // Riapplica l'evidenziazione della sintassi
+  });
+  
+  // Funzione per importare un file
+  importBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  // Gestisci l'input del file selezionato
+  fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      editor.value = e.target.result;
       updateLineNumbers();
-      
-      // Applica l'evidenziazione iniziale
       highlight();
       
-      // Aggiungi animazione di hover ai pulsanti di azione dell'editor
-      const actionButtons = document.querySelectorAll('.editor-action');
-      actionButtons.forEach(button => {
-        button.addEventListener('mouseover', function() {
-          this.style.transform = 'scale(1.2)';
-        });
+      // Aggiorna il nome del file senza estensione
+      const fileName = file.name.replace(/\.[^/.]+$/, "");
+      filenameInput.value = fileName;
+      
+      showToast(`File ${file.name} importato con successo!`, 'success');
+    };
+    
+    reader.onerror = function() {
+      showToast('Errore durante la lettura del file', 'error');
+    };
+    
+    reader.readAsText(file);
+  });
+  
+  // Funzione per copiare il codice negli appunti
+  copyBtn.addEventListener('click', () => {
+    editor.select();
+    document.execCommand('copy');
+    showToast('Codice copiato negli appunti!', 'info');
+  });
+  
+  // Funzione per scaricare il file .lua
+  downloadBtn.addEventListener('click', () => {
+    const filename = filenameInput.value || 'main';
+    const text = editor.value;
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename + '.lua');
+    
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    
+    element.click();
+    
+    document.body.removeChild(element);
+    showToast(`File ${filename}.lua scaricato!`, 'success');
+  });
+  
+  // Toggle terminale
+  terminalToggle.addEventListener('click', () => {
+    terminalWrapper.classList.toggle('expanded');
+    terminalToggle.classList.toggle('expanded');
+    if (terminalWrapper.classList.contains('expanded')) {
+      terminalInput.focus();
+    }
+  });
+  
+  // Gestione del terminale
+  terminalInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const cmd = terminalInput.value.trim();
+      
+      if (cmd) {
+        // Aggiungi il comando alla cronologia
+        terminal.innerHTML += `<div class="terminal-text"><span class="terminal-prompt">></span> ${cmd}</div>`;
         
-        button.addEventListener('mouseout', function() {
-          this.style.transform = 'scale(1)';
-        });
-      });
+        // Esegui il comando
+        executeCommand(cmd);
+        
+        // Pulisci l'input
+        terminalInput.value = '';
+      }
+      
+      // Scorri il terminale verso il basso
+      terminalWrapper.querySelector('.terminal-container').scrollTop = terminalWrapper.querySelector('.terminal-container').scrollHeight;
+    }
+  });
+  
+  // Esegui comando nel terminale
+  function executeCommand(cmd) {
+    const args = cmd.split(' ');
+    const command = args[0].toLowerCase();
+    
+    switch(command) {
+      case 'help':
+        terminal.innerHTML += helpText;
+        break;
+        
+      case 'clear':
+        terminal.innerHTML = '';
+        break;
+        
+      case 'list':
+        if (Object.keys(installedLibraries).length === 0) {
+          terminal.innerHTML += `<div class="terminal-text terminal-warning">Nessuna libreria installata.</div>`;
+        } else {
+          terminal.innerHTML += `<div class="terminal-text terminal-info">Librerie installate:</div>`;
+          terminal.innerHTML += `<div class="library-list">`;
+          
+          for (const lib in installedLibraries) {
+            terminal.innerHTML += `
+            <div class="terminal-library">
+              <span class="terminal-library-name">${lib}</span>
+              <span class="terminal-library-version">v${installedLibraries[lib].version}</span>
+            </div>`;
+          }
+          
+          terminal.innerHTML += `</div>`;
+        }
+        break;
+        
+      case 'search':
+        if (args.length < 2) {
+          terminal.innerHTML += `<div class="terminal-text terminal-error">Termine di ricerca mancante. Uso: search &lt;termine&gt;</div>`;
+        } else {
+          const term = args[1].toLowerCase();
+          let found = false;
+          
+          terminal.innerHTML += `<div class="terminal-text terminal-info">Risultati per "${term}":</div>`;
+          terminal.innerHTML += `<div class="library-list">`;
+          
+          for (const lib in luaLibraries) {
+            if (lib.toLowerCase().includes(term) || luaLibraries[lib].description.toLowerCase().includes(term)) {
+              found = true;
+              const isInstalled = installedLibraries[lib] ? ' [Installato]' : '';
+              
+              terminal.innerHTML += `
+              <div class="terminal-library">
+                <span class="terminal-library-name">${lib}${isInstalled}</span>
+                <span class="terminal-library-version">v${luaLibraries[lib].version}</span>
+              </div>
+              <div class="terminal-text">${luaLibraries[lib].description}</div>`;
+            }
+          }
+          
+          if (!found) {
+            terminal.innerHTML += `<div class="terminal-text terminal-warning">Nessun risultato trovato per "${term}"</div>`;
+          }
+          
+          terminal.innerHTML += `</div>`;
+        }
+        break;
+        
+      case 'install':
+        if (args.length < 2) {
+          terminal.innerHTML += `<div class="terminal-text terminal-error">Nome libreria mancante. Uso: install &lt;nome_libreria&gt;</div>`;
+        } else {
+          const lib = args[1].toLowerCase();
+          
+          if (luaLibraries[lib]) {
+            if (installedLibraries[lib]) {
+              terminal.innerHTML += `<div class="terminal-text terminal-warning">La libreria "${lib}" è già installata (v${installedLibraries[lib].version})</div>`;
+            } else {
+              // Simulazione installazione
+              terminal.innerHTML += `<div class="terminal-text">Installazione di ${lib} v${luaLibraries[lib].version}...</div>`;
+              
+              setTimeout(() => {
+                installedLibraries[lib] = { version: luaLibraries[lib].version };
+                terminal.innerHTML += `<div class="terminal-text terminal-success">Libreria "${lib}" installata con successo!</div>`;
+                
+                // Aggiungi il require all'editor se non è già presente
+                if (!editor.value.includes(`require("${lib}")`)) {
+                  const requireCode = `\n-- Libreria ${lib} importata dal terminale\nlocal ${lib} = require("${lib}")\n`;
+                  editor.value = requireCode + editor.value;
+                  updateLineNumbers();
+                  highlight();
+                }
+                
+                // Scorri il terminale verso il basso
+                terminalWrapper.querySelector('.terminal-container').scrollTop = terminalWrapper.querySelector('.terminal-container').scrollHeight;
+              }, 1000);
+            }
+          } else {
+            terminal.innerHTML += `<div class="terminal-text terminal-error">Libreria "${lib}" non trovata nel repository.</div>`;
+            terminal.innerHTML += `<div class="terminal-text">Usa 'search' per trovare librerie disponibili.</div>`;
+          }
+        }
+        break;
+        
+      case 'remove':
+        if (args.length < 2) {
+          terminal.innerHTML += `<div class="terminal-text terminal-error">Nome libreria mancante. Uso: remove &lt;nome_libreria&gt;</div>`;
+        } else {
+          const lib = args[1].toLowerCase();
+          
+          if (installedLibraries[lib]) {
+            // Simulazione disinstallazione
+            terminal.innerHTML += `<div class="terminal-text">Rimozione di ${lib}...</div>`;
+            
+            setTimeout(() => {
+              delete installedLibraries[lib];
+              terminal.innerHTML += `<div class="terminal-text terminal-success">Libreria "${lib}" rimossa con successo!</div>`;
+              
+              // Scorri il terminale verso il basso
+              terminalWrapper.querySelector('.terminal-container').scrollTop = terminalWrapper.querySelector('.terminal-container').scrollHeight;
+            }, 800);
+          } else {
+            terminal.innerHTML += `<div class="terminal-text terminal-error">Libreria "${lib}" non è installata.</div>`;
+          }
+        }
+        break;
+        
+      default:
+        terminal.innerHTML += `<div class="terminal-text terminal-error">Comando non riconosciuto: ${command}</div>`;
+        terminal.innerHTML += `<div class="terminal-text">Digita 'help' per visualizzare i comandi disponibili.</div>`;
+    }
+  }
+  
+  // Carica codice salvato se presente
+  if (localStorage.getItem('luaCode')) {
+    editor.value = localStorage.getItem('luaCode');
+  }
+  
+  if (localStorage.getItem('luaFilename')) {
+    filenameInput.value = localStorage.getItem('luaFilename');
+  }
+  
+  // Gestione eventi per l'editor
+  editor.addEventListener('input', function() {
+    updateLineNumbers();
+    highlight();
+    
+    // Salva il codice localmente
+    localStorage.setItem('luaCode', editor.value);
+    localStorage.setItem('luaFilename', filenameInput.value);
+  });
+  
+  editor.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      
+      // Inserisci 4 spazi al posto del tab
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      
+      this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 4;
+      
+      // Aggiorna numerazione e highlighting
+      updateLineNumbers();
+      highlight();
+    }
+  });
+  
+  // Funzione per evidenziare la sintassi Lua
+  function highlight() {
+    // In una versione reale questa funzione implementerebbe 
+    // l'evidenziazione della sintassi usando una regexp o una libreria
+    console.log("Evidenziazione sintassi applicata");
+  }
+  
+  // Aggiorna i numeri di riga all'avvio
+  updateLineNumbers();
+  
+  // Applica l'evidenziazione iniziale
+  highlight();
+  
+  // Aggiungi animazione di hover ai pulsanti di azione dell'editor
+  const actionButtons = document.querySelectorAll('.editor-action');
+  actionButtons.forEach(button => {
+    button.addEventListener('mouseover', function() {
+      this.style.transform = 'scale(1.2)';
     });
-  </script>
+    
+    button.addEventListener('mouseout', function() {
+      this.style.transform = 'scale(1)';
+    });
+  });
+});
+</script>
 </body>
 </html>
